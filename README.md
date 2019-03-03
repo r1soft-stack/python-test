@@ -87,7 +87,7 @@ class Service(View):
 
 ```python
 @receiver(post_save, sender=Notifications)
-    def increment_notification_customer_counter(sender, instance, **kwargs):
+def increment_notification_customer_counter(sender, instance, **kwargs):
 ```
 The increment_notification_customer_counter uses the django signals. This is a way to perform action by event.
 
