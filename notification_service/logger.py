@@ -46,5 +46,3 @@ class LoggerService:
         logger = logging.getLogger('notificationService')
         getattr(logger, cls.caller_level)(message)
         return cls
-
-loggerInstance = LoggerService.set_log_level('error').log({"name": "my name", "levelname": "the message", "message": "message"})
