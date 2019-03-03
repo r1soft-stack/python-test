@@ -9,12 +9,16 @@ Example:  LoggerService.set_log_level('warning').log({"name": "my name", "leveln
 Log format: [2019-03-02 22:01:48] WARNING {'message': 'message', 'name': 'my name', 'levelname': 'the message'}
 
 """
+from datetime import date
 
 from .logger import LoggerService
 from .models import Customers, NotificationCounters, Notifications
 from django.http import HttpResponse
 from django.views import View
-import re, asyncio
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.db.models import F
+import re
 
 class Service(View):
 
@@ -34,7 +38,7 @@ class Service(View):
                 customers_matches = Service.label_matches_service(queryset, notification)
 
                 " Save notification if there is any matching"
-                if customers_matches['matches_count'] >= 0:
+                if customers_matches['matches_count'] > 0:
                     Service.save_notification(notification, customers_matches['customers_id'])
 
                 return HttpResponse("Notification received!!", content_type="text/plain")
@@ -57,9 +61,34 @@ class Service(View):
         except Exception as e:
             LoggerService.set_log_level('error').log(e)
 
-    def increment_notification_customer_counter(self):
-        notificationCounters = NotificationCounters()
+    """
+    This method is triggered by post save signals.
+    Every time there is a db save, the corresponding notification counter will be incremented.
+    If row is not present will be created.
+    """
+    @receiver(post_save, sender=Notifications)
+    def increment_notification_customer_counter(sender, instance, **kwargs):
+        if instance.id_customer_id is not None:
+            try:
+                notification_counters = NotificationCounters.objects.filter(id_customers_id=instance.id_customer_id).first()
+                if notification_counters is None:
+                    notification_counters = NotificationCounters()
+                    notification_counters.num = 1
+                    notification_counters.day = date.today()
+                    notification_counters.id_customers_id = instance.id_customer_id
+                    notification_counters.save()
+                else:
+                    notification_counters.num = F('num') + 1
+                    notification_counters.day = date.today()
+                    notification_counters.save()
+            except Exception as e:
+                LoggerService.set_log_level('error').log(e)
 
+    """
+    Matching the label into the notification
+    If the notification contains more then one label, the customer id will be saved as null
+    Return a dictionary
+    """
     def label_matches_service(queryset, notification ):
         matches_count = 0
         customers_id = 0
