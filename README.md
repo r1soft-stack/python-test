@@ -4,6 +4,10 @@ This is an example Django app that uses python 3.7 and SQLite as persistence sto
 
 [Django official documentation](https://docs.djangoproject.com/en/2.2/)
 
+## Settings
+
+All the application settings are written into the `settings.py` inside the `notification_collector_settings`
+
 ## Models
 
 The db tables is reflected into the Django models and in order to use with an empty sqlite db, running make migrations and migrate commands is needed.
