@@ -23,32 +23,19 @@ class Service(View):
     def label_parsing(request):
         if request.method == 'POST':
             try:
+
+                LoggerService.set_log_level('info').log('Getting labels from customers table')
+
                 queryset = Customers.objects.values('notification_label', 'id')
 
                 " truncate at 300 "
                 notification = str(request.body)[:300] if len(str(request.body)) > 300 else str(request.body)
 
-                LoggerService.set_log_level('info').log('Getting labels from customers table')
-
-                matches_count = 0
-                customers_id = 0
-                for index, label in enumerate(queryset):
-                    search = label['notification_label']
-                    regex = r"("+search+")"
-                    matches = re.findall(regex, notification, re.MULTILINE | re.IGNORECASE)
-                    matches_count += len(matches)
-
-                    if matches_count >= 1:
-                        customers_id = label['id']
-                    """ If there is more then one label, the customers object will be emptied """
-                    if matches_count >= 2:
-                        customers_id = 0
-
-                LoggerService.set_log_level('debug').log('Matches: ' + str(matches_count) + ' - c_id: ' + str(customers_id))
+                customers_matches = Service.label_matches_service(queryset, notification)
 
                 " Save notification if there is any matching"
-                if matches_count >= 0:
-                    Service.save_notification(notification, customers_id)
+                if customers_matches['matches_count'] >= 0:
+                    Service.save_notification(notification, customers_matches['customers_id'])
 
                 return HttpResponse("Notification received!!", content_type="text/plain")
 
@@ -64,7 +51,7 @@ class Service(View):
         notification = Notifications()
         notification.body = str(body)
         if id_customer != 0:
-            notification.id_customer = id_customer
+            notification.id_customer_id = id_customer
         try:
             notification.save()
         except Exception as e:
@@ -72,3 +59,23 @@ class Service(View):
 
     def increment_notification_customer_counter(self):
         notificationCounters = NotificationCounters()
+
+    def label_matches_service(queryset, notification ):
+        matches_count = 0
+        customers_id = 0
+        for index, label in enumerate(queryset):
+            search = label['notification_label']
+            regex = r"("+search+")"
+            matches = re.findall(regex, notification, re.MULTILINE | re.IGNORECASE)
+            matches_count += len(matches)
+
+            if matches_count == 1 and customers_id == 0 :
+                customers_id = label['id']
+
+            """ If there is more then one label, the customers object will be emptied """
+            if matches_count == 2:
+                customers_id = 0
+
+        LoggerService.set_log_level('debug').log('Matches: ' + str(matches_count) + ' - c_id: ' + str(customers_id))
+
+        return {"customers_id": customers_id, "matches_count": customers_id}
