@@ -78,4 +78,4 @@ class Service(View):
 
         LoggerService.set_log_level('debug').log('Matches: ' + str(matches_count) + ' - c_id: ' + str(customers_id))
 
-        return {"customers_id": customers_id, "matches_count": customers_id}
+        return {"customers_id": customers_id, "matches_count": matches_count}
