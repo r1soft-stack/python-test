@@ -78,7 +78,7 @@ class Service(View):
 ### Application logger
 
 The service uses a custom dynamic application logger and one file for each log level will be wrote.
-Take a look at the configuration below. The base logging class is the Django default one.
+Take a look at the configuration below. The base logging class is the Django default one. The logs file will be placed into the logs folder into the project root.
 
 ```python
 logging.config.dictConfig({
