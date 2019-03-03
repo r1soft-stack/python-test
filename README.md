@@ -83,6 +83,14 @@ class Service(View):
                 ............
 ```
 
+### Application service - signals
+
+```python
+@receiver(post_save, sender=Notifications)
+    def increment_notification_customer_counter(sender, instance, **kwargs):
+```
+The increment_notification_customer_counter uses the django signals. This is a way to perform action by event.
+
 ### Application logger
 
 The service uses a custom dynamic application logger and one file for each log level will be wrote.
