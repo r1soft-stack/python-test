@@ -39,6 +39,74 @@ urlpatterns = [
 ]
 ```
 
+### Application service
+
+The core is the application service that does the need stuff to manage the `notification service` flow.
+
+```python
+from datetime import date
+
+from .logger import LoggerService
+from .models import Customers, NotificationCounters, Notifications
+from django.http import HttpResponse
+from django.views import View
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.db.models import F
+import re
+
+class Service(View):
+
+    " Get labels from the model" \
+    " The cache are not implemented so the query is executed each time "
+    def label_parsing(request):
+        if request.method == 'POST':
+            try:
+
+                LoggerService.set_log_level('info').log('Getting labels from customers table')
+
+                queryset = Customers.objects.values('notification_label', 'id')
+
+                " truncate at 300 "
+                notification = str(request.body)[:300] if len(str(request.body)) > 300 else str(request.body)
+
+                customers_matches = Service.label_matches_service(queryset, notification)
+                
+                ............
+```
+
+### Application logger
+
+The service uses a custom dynamic application logger and one file for each log level will be wrote.
+Take a look at the configuration below. The base logging class is the Django default one.
+
+```python
+logging.config.dictConfig({
+            'version': 1,
+            'disable_existing_loggers': False,
+            'formatters': {
+                'simple': {
+                    'format': '[%(asctime)s] %(levelname)s %(module)s %(process)d %(thread)d %(message)s',
+                    'datefmt': '%Y-%m-%d %H:%M:%S'
+                },
+            },
+            'handlers': {
+                'logfile': {
+                    'level': level.upper(),
+                    'class': 'logging.FileHandler',
+                    'filename': 'logs/' + level.upper() + '.log',
+                    'formatter': 'simple'
+                },
+            },
+            'loggers': {
+                'notificationService': {
+                    'handlers': ['logfile'],
+                    'level': level.upper()
+                },
+            },
+        })
+```
+
 ## Building
 
 It is best to use the python `virtualenv` tool to build locally:
