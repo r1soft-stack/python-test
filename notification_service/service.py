@@ -30,16 +30,25 @@ class Service(View):
 
                 LoggerService.set_log_level('info').log('Getting labels from customers table')
 
-                customers = {}
+                matches_count = 0
+                customers_id = 0
                 for index, label in enumerate(queryset):
-                    customers[index] = label['notification_label']
                     search = label['notification_label']
                     regex = r"("+search+")"
                     matches = re.findall(regex, notification, re.MULTILINE | re.IGNORECASE)
-                    LoggerService.set_log_level('debug').log('Matches: ' + str(len(matches)))
+                    matches_count += len(matches)
 
-                " Save notification "
-                Service.save_notification(notification, 2)
+                    if matches_count >= 1:
+                        customers_id = label['id']
+                    """ If there is more then one label, the customers object will be emptied """
+                    if matches_count >= 2:
+                        customers_id = 0
+
+                LoggerService.set_log_level('debug').log('Matches: ' + str(matches_count) + ' - c_id: ' + str(customers_id))
+
+                " Save notification if there is any matching"
+                if matches_count >= 0:
+                    Service.save_notification(notification, customers_id)
 
                 return HttpResponse("Notification received!!", content_type="text/plain")
 
@@ -52,13 +61,14 @@ class Service(View):
 
     " Actually we are not checking the data inserted into db, we assume it's safe"
     def save_notification(body, id_customer):
-        LoggerService.set_log_level('debug').log('save_notification')
         notification = Notifications()
         notification.body = str(body)
-        notification.id_customer_id = id_customer
-        notification.save()
-        LoggerService.set_log_level('debug').log('save_notification - saved')
+        if id_customer != 0:
+            notification.id_customer = id_customer
+        try:
+            notification.save()
+        except Exception as e:
+            LoggerService.set_log_level('error').log(e)
 
     def increment_notification_customer_counter(self):
         notificationCounters = NotificationCounters()
-

@@ -20,4 +20,4 @@ class NotificationCounters(models.Model):
 # Notifications id is auto created
 class Notifications(models.Model):
     body = models.TextField(null=False)
-    id_customer = models.ForeignKey('Customers', on_delete='cascade')
+    id_customer = models.ForeignKey('Customers', on_delete='cascade', null=True)

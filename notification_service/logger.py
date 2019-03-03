@@ -6,9 +6,12 @@ from logging import config
 
 
 class LoggerService:
-    def __init__(self):
-        self.level = ""
 
+    """
+    This method accept only one parameter. It's look like a setter.
+    Here is the place where is possible to define log configurations.
+    This method configures file logging handlers for writing one file for each kind of log (INFO, DEBUG, ERROR)
+    """
     @classmethod
     def set_log_level(cls, level='INFO'):
         logging.config.dictConfig({
@@ -16,7 +19,7 @@ class LoggerService:
             'disable_existing_loggers': False,
             'formatters': {
                 'simple': {
-                    'format': '[%(asctime)s] %(levelname)s %(message)s',
+                    'format': '[%(asctime)s] %(levelname)s %(module)s %(process)d %(thread)d %(message)s',
                     'datefmt': '%Y-%m-%d %H:%M:%S'
                 },
             },
@@ -41,6 +44,11 @@ class LoggerService:
 
         return cls
 
+    """
+    This method accepts only parameter and it could be string, dict, or any other type.
+    The log method corresponding to caller_level will be called.
+    The logger instance given by the getLogger is defined in the set_log_level method
+    """
     @classmethod
     def log(cls, message):
         logger = logging.getLogger('notificationService')
