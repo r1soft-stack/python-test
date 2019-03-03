@@ -1,6 +1,17 @@
 # Django Test app
 
-This is an example Django app that uses python 3.7
+This is an example Django app that uses python 3.7 and SQLite as persistence storage.
+
+## Models
+
+The db tables is reflected into the Django models and in order to use with an empty sqlite db, running make migrations a migrate is needed.
+
+
+```sh
+# run this commands into the project root
+$ python manage.py makemigrations
+$ python manage.py migrate
+```
 
 [Django official documentation](https://docs.djangoproject.com/en/2.2/)
 
