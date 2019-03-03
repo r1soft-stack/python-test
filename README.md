@@ -28,6 +28,10 @@ urlpatterns = [
 ]
 ```
 
+### Application 
+
+This Django project has one application: `notification_service`
+
 ### Application urls
 
 ```python
