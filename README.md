@@ -10,7 +10,7 @@ All the application settings are written into the `settings.py` inside the `noti
 
 ## Models
 
-The db tables is reflected into the Django models and in order to use with an empty sqlite db, running make migrations and migrate commands is needed.
+The db tables are reflected into the Django models and in order to use with an empty sqlite db, running make migrations and migrate commands is needed.
 
 
 ```sh
