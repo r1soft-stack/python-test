@@ -136,7 +136,7 @@ $ DEVELOPMENT=1 python manage.py runserver
 
 Then visit `http://localhost:8000` to view the app. Alternatively you
 can use foreman and gunicorn to run the server locally (after copying
-`dev.env` to `.env`):
+`dev.env` to `.env`) if env is necessary:
 
 ```sh
 $ foreman start
