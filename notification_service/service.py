@@ -9,18 +9,23 @@ Example:  LoggerService.set_log_level('warning').log({"name": "my name", "leveln
 Log format: [2019-03-02 22:01:48] WARNING {'message': 'message', 'name': 'my name', 'levelname': 'the message'}
 
 """
-from datetime import date
 
 from .logger import LoggerService
 from .models import Customers, NotificationCounters, Notifications
 from django.http import HttpResponse
-from django.views import View
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models import F
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from celery import shared_task
+
+from datetime import date
 import re
 
-class Service(View):
+class Service(APIView):
 
     " Get labels from the model" \
     " The cache are not implemented so the query is executed each time "
@@ -108,3 +113,12 @@ class Service(View):
         LoggerService.set_log_level('debug').log('Matches: ' + str(matches_count) + ' - c_id: ' + str(customers_id))
 
         return {"customers_id": customers_id, "matches_count": matches_count}
+
+
+    def celery_task(request):
+        Service.the_task.delay(request.method)
+        return HttpResponse("Here's the text of the Web page.")
+
+    @shared_task
+    def the_task(request_method):
+        LoggerService.set_log_level('info').log(request_method)

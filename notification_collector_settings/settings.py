@@ -70,6 +70,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'notification_collector_settings.wsgi.application'
 
+CELERY_BROKER_URL = 'redis://redis'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
